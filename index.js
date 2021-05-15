@@ -1,3 +1,4 @@
+const fetch = require('node-fetch');
 module.exports = (api) => {
   api.registerAccessory('owntone-radio', OwnToneRadio);
 }
@@ -11,9 +12,8 @@ class OwnToneRadio {
     this.log = log;
     this.config = config;
     this.api = api;
+    this.id = config['id'];
     this.name = config['name'];
-    this.ip = config['ip'];
-
     this.log.debug('owntone-radio plugin loaded');
 
     // your accessory must have an AccessoryInformation service
@@ -52,6 +52,28 @@ class OwnToneRadio {
 
   async setOnHandler(value) {
     this.log.debug('Setting switch state to:', value);
-    this.log.debug('config details are:', this.name, this.ip);
+    this.log.debug('config details are:', this.name, this.id);
+    if (value == true){
+      fetch('http://192.168.0.78:3689/api/outputs')
+      .then(res => res.json())
+      .then(json => this.log.debug(json));
+      fetch('http://192.168.0.78:3689/api/queue/items/add?uris=library:playlist:7', {
+        method: 'POST'
+      });
+      fetch('http://192.168.0.78:3689/api/outputs/id',{
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8'
+        },
+        body: JSON.stringify({"selected":true})
+      });
+      fetch('http://192.168.0.78:3689/api/player/play', {
+        method: 'PUT'
+      });
+
+    }
+    else{
+      this.log.debug("Switched off");
+    }
   }
 }
