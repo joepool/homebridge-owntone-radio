@@ -14,7 +14,9 @@ class OwnToneRadio {
     this.api = api;
     this.id = config['id'];
     this.name = config['name'];
+    this.serverip = config['serverip'];
     this.log.debug('owntone-radio plugin loaded');
+    this.log.debug(this.srv_ip);
 
     // your accessory must have an AccessoryInformation service
     this.informationService = new this.api.hap.Service.AccessoryInformation()
@@ -52,22 +54,21 @@ class OwnToneRadio {
 
   async setOnHandler(value) {
     this.log.debug('Setting switch state to:', value);
-    this.log.debug('config details are:', this.name, this.id);
     if (value == true){
-      fetch('http://192.168.0.78:3689/api/outputs')
+      fetch(`http://${this.serverip}:3689/api/outputs`)
       .then(res => res.json())
       .then(json => this.log.debug(json));
-      fetch('http://192.168.0.78:3689/api/queue/items/add?uris=library:playlist:7', {
+      fetch(`http://${this.serverip}:3689/api/queue/items/add?uris=library:playlist:7`, {
         method: 'POST'
       });
-      fetch('http://192.168.0.78:3689/api/outputs/id',{
+      fetch(`http://${this.serverip}:3689/api/outputs/${this.id}`,{
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json; charset=UTF-8'
         },
         body: JSON.stringify({"selected":true})
       });
-      fetch('http://192.168.0.78:3689/api/player/play', {
+      fetch(`http://${this.serverip}:3689/api/player/play`, {
         method: 'PUT'
       });
 
