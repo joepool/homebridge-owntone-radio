@@ -41,25 +41,32 @@ class OwnToneRadio {
       this.switchService,
     ];
   }
-
   async getOnHandler() {
     // get the current value of the switch in your own code
     this.log.debug('Getting switch state');
     let value = false;
-
+    //gets the global playing state
     async function getStatus(serverip){
       return await fetch(`http://${serverip}:3689/api/player`)
       .then(res => res.json());
     }
     let player = await getStatus(this.serverip);
     this.log.debug(player);
-    if(player.state == 'play'){
+    //gets the device active state
+    async function getActive(serverip){
+      return await fetch(`http://${serverip}:3689/api/outputs`)
+      .then(res => res.json());
+    }
+    let outputs = await getActive(this.serverip);
+    var result = outputs.outputs.filter(a => a.id == this.id);
+    //processes both and sets the device state accordingly. 
+    //need exception handling here, incase result[] is empty.
+    if(player.state == 'play' && result[0].selected == true){
       value = true;
     }
     this.log.debug(value);
     return value;
   }
-
   async setOnHandler(value) {
     this.log.debug('Setting switch state to:', value);
     if (value == true){
