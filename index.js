@@ -16,7 +16,6 @@ class OwnToneRadio {
     this.name = config['name'];
     this.serverip = config['serverip'];
     this.log.debug('owntone-radio plugin loaded');
-    this.log.debug(this.srv_ip);
 
     // your accessory must have an AccessoryInformation service
     this.informationService = new this.api.hap.Service.AccessoryInformation()
@@ -44,11 +43,20 @@ class OwnToneRadio {
   }
 
   async getOnHandler() {
-    this.log.debug('Getting switch state');
-
     // get the current value of the switch in your own code
-    const value = false;
+    this.log.debug('Getting switch state');
+    let value = false;
 
+    async function getStatus(serverip){
+      return await fetch(`http://${serverip}:3689/api/player`)
+      .then(res => res.json());
+    }
+    let player = await getStatus(this.serverip);
+    this.log.debug(player);
+    if(player.state == 'play'){
+      value = true;
+    }
+    this.log.debug(value);
     return value;
   }
 
