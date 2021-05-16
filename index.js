@@ -70,9 +70,6 @@ class OwnToneRadio {
   async setOnHandler(value) {
     this.log.debug('Setting switch state to:', value);
     if (value == true){
-      fetch(`http://${this.serverip}:3689/api/outputs`)
-      .then(res => res.json())
-      .then(json => this.log.debug(json));
       fetch(`http://${this.serverip}:3689/api/queue/items/add?uris=library:playlist:7`, {
         method: 'POST'
       });
@@ -89,6 +86,19 @@ class OwnToneRadio {
 
     }
     else{
+      fetch(`http://${this.serverip}:3689/api/player/stop`, {
+        method: 'PUT'
+      });
+      fetch(`http://${this.serverip}:3689/api/queue/clear`, {
+        method: 'PUT'
+      });
+      fetch(`http://${this.serverip}:3689/api/outputs/${this.id}`,{
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8'
+        },
+        body: JSON.stringify({"selected":false})
+      });
       this.log.debug("Switched off");
     }
   }
