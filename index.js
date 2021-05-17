@@ -16,6 +16,7 @@ class OwnToneRadio {
     this.name = config['name'];
     this.serverip = config['serverip'] || 'localhost';
     this.serverport = config['serverport'] || '3689';
+    this.stationuri = config['stationuri'];
     this.log.debug('owntone-radio plugin loaded');
 
     // your accessory must have an AccessoryInformation service
@@ -52,7 +53,7 @@ class OwnToneRadio {
       .then(res => res.json());
     }
     let player = await getStatus(this.serverip, this.serverport);
-    this.log.debug(player);
+    //this.log.debug(player);
     //gets the device active state
     async function getActive(serverip, serverport){
       return await fetch(`http://${serverip}:${serverport}/api/outputs`)
@@ -71,7 +72,7 @@ class OwnToneRadio {
   async setOnHandler(value) {
     this.log.debug('Setting switch state to:', value);
     if (value == true){
-      fetch(`http://${this.serverip}:${this.serverport}/api/queue/items/add?uris=library:playlist:7`, {
+      fetch(`http://${this.serverip}:${this.serverport}/api/queue/items/add?uris=${this.stationuri}`, {
         method: 'POST'
       });
       fetch(`http://${this.serverip}:${this.serverport}/api/outputs/${this.id}`,{
@@ -92,7 +93,7 @@ class OwnToneRadio {
         .then(res => res.json());
        }
       let outputs = await getActive(this.serverip, this.serverport);
-      let arr_ative = outputs.outputs.filter(a => a.selected == true);//get array of active outputs
+      let arr_active = outputs.outputs.filter(a => a.selected == true);//get array of active outputs
       if (arr_active.length > 1){// if this isn't the last output active, only toggle the output
         fetch(`http://${this.serverip}:${this.serverport}/api/outputs/${this.id}`,{
         method: 'PUT',
