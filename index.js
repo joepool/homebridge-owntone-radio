@@ -14,7 +14,8 @@ class OwnToneRadio {
     this.api = api;
     this.id = config['id'];
     this.name = config['name'];
-    this.serverip = config['serverip'];
+    this.serverip = config['serverip'] || 'localhost';
+    this.serverport = config['serverport'] || '3689';
     this.log.debug('owntone-radio plugin loaded');
 
     // your accessory must have an AccessoryInformation service
@@ -46,18 +47,18 @@ class OwnToneRadio {
     this.log.debug('Getting switch state');
     let value = false;
     //gets the global playing state
-    async function getStatus(serverip){
-      return await fetch(`http://${serverip}:3689/api/player`)
+    async function getStatus(serverip,serverport){
+      return await fetch(`http://${serverip}:${serverport}/api/player`)
       .then(res => res.json());
     }
-    let player = await getStatus(this.serverip);
+    let player = await getStatus(this.serverip, this.serverport);
     this.log.debug(player);
     //gets the device active state
-    async function getActive(serverip){
-      return await fetch(`http://${serverip}:3689/api/outputs`)
+    async function getActive(serverip, serverport){
+      return await fetch(`http://${serverip}:${serverport}/api/outputs`)
       .then(res => res.json());
     }
-    let outputs = await getActive(this.serverip);
+    let outputs = await getActive(this.serverip, this.serverport);
     var result = outputs.outputs.filter(a => a.id == this.id);
     //processes both and sets the device state accordingly. 
     //need exception handling here, incase result[] is empty.
@@ -70,29 +71,30 @@ class OwnToneRadio {
   async setOnHandler(value) {
     this.log.debug('Setting switch state to:', value);
     if (value == true){
-      fetch(`http://${this.serverip}:3689/api/queue/items/add?uris=library:playlist:7`, {
+      fetch(`http://${this.serverip}:${this.serverport}/api/queue/items/add?uris=library:playlist:7`, {
         method: 'POST'
       });
-      fetch(`http://${this.serverip}:3689/api/outputs/${this.id}`,{
+      fetch(`http://${this.serverip}:${this.serverport}/api/outputs/${this.id}`,{
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json; charset=UTF-8'
         },
         body: JSON.stringify({"selected":true})
       });
-      fetch(`http://${this.serverip}:3689/api/player/play`, {
+      fetch(`http://${this.serverip}:${this.serverport}/api/player/play`, {
         method: 'PUT'
       });
 
     }
     else{
-      fetch(`http://${this.serverip}:3689/api/player/stop`, {
+      //need to do something here if other inputs are active to only toggle the output that was switched off at the moment everything is stopped if one is switched off.
+      fetch(`http://${this.serverip}:${this.serverport}/api/player/stop`, {
         method: 'PUT'
       });
-      fetch(`http://${this.serverip}:3689/api/queue/clear`, {
+      fetch(`http://${this.serverip}:${this.serverport}/api/queue/clear`, {
         method: 'PUT'
       });
-      fetch(`http://${this.serverip}:3689/api/outputs/${this.id}`,{
+      fetch(`http://${this.serverip}:${this.serverport}/api/outputs/${this.id}`,{
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json; charset=UTF-8'
