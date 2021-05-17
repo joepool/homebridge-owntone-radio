@@ -87,20 +87,36 @@ class OwnToneRadio {
 
     }
     else{
-      //need to do something here if other inputs are active to only toggle the output that was switched off at the moment everything is stopped if one is switched off.
-      fetch(`http://${this.serverip}:${this.serverport}/api/player/stop`, {
-        method: 'PUT'
-      });
-      fetch(`http://${this.serverip}:${this.serverport}/api/queue/clear`, {
-        method: 'PUT'
-      });
-      fetch(`http://${this.serverip}:${this.serverport}/api/outputs/${this.id}`,{
+      async function getActive(serverip, serverport){
+        return await fetch(`http://${serverip}:${serverport}/api/outputs`)
+        .then(res => res.json());
+       }
+      let outputs = await getActive(this.serverip, this.serverport);
+      let arr_ative = outputs.outputs.filter(a => a.selected == true);//get array of active outputs
+      if (arr_active.length > 1){// if this isn't the last output active, only toggle the output
+        fetch(`http://${this.serverip}:${this.serverport}/api/outputs/${this.id}`,{
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json; charset=UTF-8'
         },
         body: JSON.stringify({"selected":false})
       });
+      }
+      else{// if its the last output active, stop playback, clear queue, toggle output.
+        fetch(`http://${this.serverip}:${this.serverport}/api/player/stop`, {
+          method: 'PUT'
+        });
+        fetch(`http://${this.serverip}:${this.serverport}/api/queue/clear`, {
+          method: 'PUT'
+        });
+        fetch(`http://${this.serverip}:${this.serverport}/api/outputs/${this.id}`,{
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json; charset=UTF-8'
+          },
+          body: JSON.stringify({"selected":false})
+        });
+      }
       this.log.debug("Switched off");
     }
   }
