@@ -44,6 +44,7 @@ class OwnToneRadio {
     ];
   }
   async getOnHandler() {
+    //i need another check to see if the track is queued, if it is then set the state to active, else set to inactive
     // get the current value of the switch in your own code
     this.log.debug('Getting switch state');
     let value = false;
@@ -61,6 +62,13 @@ class OwnToneRadio {
     }
     let outputs = await getActive(this.serverip, this.serverport);
     var result = outputs.outputs.filter(a => a.id == this.id);
+
+    //get queue
+    //check if this.stationuri is in queue
+    //if it is, set status to on
+    //else set to on
+    //this will only work if i can remove the different from queue down at line 115
+
     //processes both and sets the device state accordingly. 
     //need exception handling here, incase result[] is empty.
     if(player.state == 'play' && result[0].selected == true){
@@ -70,11 +78,28 @@ class OwnToneRadio {
     return value;
   }
   async setOnHandler(value) {
+    // add new item to queue, then check if there are two items in queue with different uri's, if there are, dont activate device or play, if not, continue 
     this.log.debug('Setting switch state to:', value);
     if (value == true){
       fetch(`http://${this.serverip}:${this.serverport}/api/queue/items/add?uris=${this.stationuri}`, {
         method: 'POST'
       });
+      async function getQueue(serverip, serverport){
+        return await fetch(`http://${serverip}:${serverport}/api/queue`)
+        .then(res => res.json());
+      }
+      let queue = await getQueue(this.serverip, this.serverport);
+      var items = queue.items
+      function urisAreIdentical(arr) {//function to check if there are duplicate items in queue.
+        let theuri, urisAreTheSame = true;
+        arr.forEach(obj => {
+          if (!theuri) theuri = obj.uri;
+          else if (theuri != obj.uri) urisAreTheSame = false;
+        })
+      return urisAreTheSame;
+      }
+      var DifferentInQueue = urisAreIdentical(items);//true or false depending on if there are duplicate items in the queue.
+      if (DifferentInQueue){
       fetch(`http://${this.serverip}:${this.serverport}/api/outputs/${this.id}`,{
         method: 'PUT',
         headers: {
@@ -85,7 +110,20 @@ class OwnToneRadio {
       fetch(`http://${this.serverip}:${this.serverport}/api/player/play`, {
         method: 'PUT'
       });
+    }
+    else{
+      //this removes all the items from the queue that are different to what is currently playing. This runs if the item just added to the queue is different to what is currently playing
+      let queued = items.filter(a => a.uri == this.stationuri);
+      let ids_to_remove = queued.map(a => a.id);
+      this.log.debug(ids_to_remove);
+      for (const id of ids_to_remove) {
+        fetch(`http://${this.serverip}:${this.serverport}/api/queue/items/${id}`, {
+          method: 'DELETE'
+        });
+      }
 
+      this.log("Alredy different station playing on another device, stop that before starting another station");
+    }
     }
     else{
       async function getActive(serverip, serverport){
