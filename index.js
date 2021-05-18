@@ -44,7 +44,6 @@ class OwnToneRadio {
     ];
   }
   async getOnHandler() {
-    //i need another check to see if the track is queued, if it is then set the state to active, else set to inactive
     // get the current value of the switch in your own code
     this.log.debug('Getting switch state');
     let value = false;
@@ -54,7 +53,6 @@ class OwnToneRadio {
       .then(res => res.json());
     }
     let player = await getStatus(this.serverip, this.serverport);
-    //this.log.debug(player);
     //gets the device active state
     async function getActive(serverip, serverport){
       return await fetch(`http://${serverip}:${serverport}/api/outputs`)
@@ -62,16 +60,16 @@ class OwnToneRadio {
     }
     let outputs = await getActive(this.serverip, this.serverport);
     var result = outputs.outputs.filter(a => a.id == this.id);
-
-    //get queue
-    //check if this.stationuri is in queue
-    //if it is, set status to on
-    //else set to on
-    //this will only work if i can remove the different from queue down at line 115
-
-    //processes both and sets the device state accordingly. 
+    //this gets the queue and then check if the station in the config matches whats in the queue.
+    async function getQueue(serverip, serverport){
+    	return await fetch(`http://${serverip}:${serverport}/api/queue`)
+        .then(res => res.json());
+    }
+    let queue = await getQueue(this.serverip, this.serverport);
+    let items = queue.items;
+    let inqueue = items.some(a => a.uri == this.stationuri);
     //need exception handling here, incase result[] is empty.
-    if(player.state == 'play' && result[0].selected == true){
+    if(player.state == 'play' && result[0].selected && inqueue){
       value = true;
     }
     this.log.debug(value);
