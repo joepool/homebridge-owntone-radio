@@ -22,12 +22,22 @@ class OwnToneRadio {
         .then(this.checkResponseStatus)
         .catch((err) => this.ServerError(err));
 
-
-    if (this.serverip != 'localhost'){//temporary for testing
-    	this.log.warn('Something is wrong with your config, this accessory hasnt been loaded.');
+    var missing = ' is missing from your config, this accessory will not be loaded.';
+    if (this.id == null){
+    	this.log.warn('Device ID', missing);
     	return;
     }
-    
+    if (this.name == null){
+      this.log.warn('Device Name', missing);
+      return;
+    }
+    if (this.stationuri == null){
+      this.log.warn('Station URI', missing);
+      return;
+    }
+    if (this.serverip == 'localhost'){
+      this.log('Server IP address not entered, using localhost');
+    }
     // your accessory must have an AccessoryInformation service
     this.informationService = new this.api.hap.Service.AccessoryInformation()
       .setCharacteristic(this.api.hap.Characteristic.Manufacturer, "Custom Manufacturer")
