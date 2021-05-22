@@ -17,11 +17,18 @@ class OwnToneRadio {
     this.serverip = config['serverip'] || 'localhost';
     this.serverport = config['serverport'] || '3689';
     this.stationuri = config['stationuri'];
-
-    fetch(`http://${this.serverip}:${this.serverport}/api/config`)
+/*
+    fetch(`http://${this.serverip}:${this.serverport}/api/config`)//leaving this here as an example for when i add exception handling to all the fetch calls
         .then(this.checkResponseStatus)
         .catch((err) => this.ServerError(err));
 
+*/
+    var Status = this.fetchStatus(`http://${this.serverip}:${this.serverport}/api/config`);
+    Status.then(a => {
+      if(a.code == 'ECONNREFUSED'){
+        this.log.warn('Server is down or IP address is incorrect');
+      }
+    });
     var missing = ' is missing from your config, this accessory will not be loaded.';
     if (this.id == null){
     	this.log.warn('Device ID', missing);
@@ -52,6 +59,20 @@ class OwnToneRadio {
       .onSet(this.setOnHandler.bind(this));  // bind to setOnHandler method below
     this.log.debug('owntone-radio plugin loaded');
   }
+
+  fetchStatus(url){//probably change this to a better method, with better exception handling etc
+    return fetch(url)
+    .then(response => response.json())
+    .then(function(response) {
+      return (response);
+
+    })
+    .catch(function(error) {
+      return (error);
+    });    
+  }
+
+
   checkResponseStatus(res) {
     if(res.ok){
         return res
