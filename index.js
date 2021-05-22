@@ -17,8 +17,17 @@ class OwnToneRadio {
     this.serverip = config['serverip'] || 'localhost';
     this.serverport = config['serverport'] || '3689';
     this.stationuri = config['stationuri'];
-    this.log.debug('owntone-radio plugin loaded');
 
+    fetch(`http://${this.serverip}:${this.serverport}/api/config`)
+        .then(this.checkResponseStatus)
+        .catch((err) => this.ServerError(err));
+
+
+    if (this.serverip != 'localhost'){//temporary for testing
+    	this.log.warn('Something is wrong with your config, this accessory hasnt been loaded.');
+    	return;
+    }
+    
     // your accessory must have an AccessoryInformation service
     this.informationService = new this.api.hap.Service.AccessoryInformation()
       .setCharacteristic(this.api.hap.Characteristic.Manufacturer, "Custom Manufacturer")
@@ -31,8 +40,20 @@ class OwnToneRadio {
     this.switchService.getCharacteristic(this.api.hap.Characteristic.On)
       .onGet(this.getOnHandler.bind(this))   // bind to getOnHandler method below
       .onSet(this.setOnHandler.bind(this));  // bind to setOnHandler method below
+    this.log.debug('owntone-radio plugin loaded');
   }
-
+  checkResponseStatus(res) {
+    if(res.ok){
+        return res
+    } 
+    else {
+        throw new Error(`The HTTP status of the reponse: ${res.status} (${res.statusText})`);
+    }
+  }
+  ServerError(err){
+    this.log.warn('Cannot connect to OwnTone Server. Please check you have the correct IP Address and the server is running.');
+    this.log.debug(err);
+  }
   /**
    * REQUIRED - This must return an array of the services you want to expose.
    * This method must be named "getServices".
