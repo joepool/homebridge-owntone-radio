@@ -20,7 +20,8 @@ class OwnToneRadio {
 /*
     fetch(`http://${this.serverip}:${this.serverport}/api/config`)//leaving this here as an example for when i add exception handling to all the fetch calls
         .then(this.checkResponseStatus)
-        .catch((err) => this.ServerError(err));
+        .then do the stuff.
+        .catch((err) => ServerError(err));
 
 */
     var Status = this.fetchStatus(`http://${this.serverip}:${this.serverport}/api/config`);
@@ -73,17 +74,20 @@ class OwnToneRadio {
   }
 
 
-  checkResponseStatus(res) {
+  checkResponseStatus(res) {// add some elseif's for different errors with different messagaes(an array with two strings, one for warning log, one for debug log), ill then change servererror() to log both of these.
+    console.log('running');
+    console.log(res.ok);
     if(res.ok){
         return res
     } 
     else {
         throw new Error(`The HTTP status of the reponse: ${res.status} (${res.statusText})`);
+        console.log('thrown error');
     }
   }
   ServerError(err){
-    this.log.warn('Cannot connect to OwnTone Server. Please check you have the correct IP Address and the server is running.');
-    this.log.debug(err);
+    console.log('Cannot connect to OwnTone Server. Please check you have the correct IP Address and the server is running.');
+    console.log(err);
   }
   /**
    * REQUIRED - This must return an array of the services you want to expose.
@@ -100,24 +104,51 @@ class OwnToneRadio {
     this.log.debug('Getting switch state');
     let value = false;
     //gets the global playing state
-    async function getStatus(serverip,serverport){
+    async function getStatus(serverip,serverport,checkResponseStatus,ServerError){
       return await fetch(`http://${serverip}:${serverport}/api/player`)
-      .then(res => res.json());
+      .catch(err => {
+      return {
+        ok: false,
+        status: -1,
+        statusText: 'Network Failure',
+      };
+      })
+      .then(checkResponseStatus)
+      .then(res => res.json())
+      .catch((err) => ServerError(err));
     }
-    let player = await getStatus(this.serverip, this.serverport);
+    let player = await getStatus(this.serverip, this.serverport, this.checkResponseStatus, this.ServerError);
     //gets the device active state
-    async function getActive(serverip, serverport){
+    async function getActive(serverip,serverport,checkResponseStatus,ServerError){
       return await fetch(`http://${serverip}:${serverport}/api/outputs`)
-      .then(res => res.json());
+      .catch(err => {
+      return {
+        ok: false,
+        status: -1,
+        statusText: 'Network Failure',
+      };
+      })      
+      .then(checkResponseStatus)
+      .then(res => res.json())
+      .catch((err) => ServerError(err));
     }
-    let outputs = await getActive(this.serverip, this.serverport);
+    let outputs = await getActive(this.serverip, this.serverport,this.checkResponseStatus, this.ServerError);
     var result = outputs.outputs.filter(a => a.id == this.id);
     //this gets the queue and then check if the station in the config matches whats in the queue.
-    async function getQueue(serverip, serverport){
+    async function getQueue(serverip,serverport,checkResponseStatus,ServerError){
     	return await fetch(`http://${serverip}:${serverport}/api/queue`)
-        .then(res => res.json());
+      .catch(err => {
+      return {
+        ok: false,
+        status: -1,
+        statusText: 'Network Failure',
+      };
+      })
+      .then(checkResponseStatus)
+      .then(res => res.json())
+      .catch((err) => ServerError(err));
     }
-    let queue = await getQueue(this.serverip, this.serverport);
+    let queue = await getQueue(this.serverip, this.serverport,this.checkResponseStatus);
     let items = queue.items;
     let inqueue = items.some(a => a.uri == this.stationuri);
     //need exception handling here, incase result[] is empty.
@@ -134,11 +165,20 @@ class OwnToneRadio {
       fetch(`http://${this.serverip}:${this.serverport}/api/queue/items/add?uris=${this.stationuri}`, {
         method: 'POST'
       });
-      async function getQueue(serverip, serverport){
+      async function getQueue(serverip,serverport,checkResponseStatus,ServerError){
         return await fetch(`http://${serverip}:${serverport}/api/queue`)
-        .then(res => res.json());
+      .catch(err => {
+      return {
+        ok: false,
+        status: -1,
+        statusText: 'Network Failure',
+      };
+      })
+        .then(checkResponseStatus)
+        .then(res => res.json())
+        .catch((err) => ServerError(err));
       }
-      let queue = await getQueue(this.serverip, this.serverport);
+      let queue = await getQueue(this.serverip, this.serverport,this.checkResponseStatus,this.ServerError);
       var items = queue.items
       function urisAreIdentical(arr) {//function to check if there are duplicate items in queue.
         let theuri, urisAreTheSame = true;
