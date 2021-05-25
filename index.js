@@ -67,9 +67,31 @@ class OwnToneRadio {
     .then(checkResponseStatus)
     .then(res => res.json())
     .catch((err) => ServerError(err));
-    }
-
-
+  }
+  fetchPOST(url){//needs exception handling
+    fetch(url, {
+      method: 'POST'
+    });
+  }
+  fetchPUTdata(url, selected){//this needs some attention bc it doesnt work.
+    fetch(url,{
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8'
+      },
+      body: JSON.stringify({'selected': selected})
+    });
+  }
+  fetchPUT(url){
+    fetch(url, {
+      method: 'PUT'
+    });
+  }
+  fetchDELETE(url){
+    fetch(url, {
+      method: 'DELETE'
+    });
+  }
   fetchStatus(url){//probably change this to a better method, with better exception handling etc
     return fetch(url)
     .then(response => response.json())
@@ -84,8 +106,6 @@ class OwnToneRadio {
 
 
   checkResponseStatus(res) {// add some elseif's for different errors with different messagaes(an array with two strings, one for warning log, one for debug log), ill then change servererror() to log both of these.
-    console.log('running');
-    console.log(res.ok);
     if(res.ok){
         return res
     } 
@@ -132,10 +152,7 @@ class OwnToneRadio {
     // add new item to queue, then check if there are two items in queue with different uri's, if there are, dont activate device or play, if not, continue 
     this.log.debug('Setting switch state to:', value);
     if (value == true){
-      fetch(`http://${this.serverip}:${this.serverport}/api/queue/items/add?uris=${this.stationuri}`, {
-        method: 'POST'
-      });
-
+      this.fetchPOST(`http://${this.serverip}:${this.serverport}/api/queue/items/add?uris=${this.stationuri}`);
       let queue = await this.fetchGET(`http://${this.serverip}:${this.serverport}/api/queue`,this.checkResponseStatus, this.ServerError); //getQueue
       var items = queue.items
       function urisAreIdentical(arr) {//function to check if there are duplicate items in queue.
@@ -148,61 +165,30 @@ class OwnToneRadio {
       }
       var DifferentInQueue = urisAreIdentical(items);//true or false depending on if there are duplicate items in the queue.
       if (DifferentInQueue){
-      fetch(`http://${this.serverip}:${this.serverport}/api/outputs/${this.id}`,{
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json; charset=UTF-8'
-        },
-        body: JSON.stringify({"selected":true})
-      });
-      fetch(`http://${this.serverip}:${this.serverport}/api/player/play`, {
-        method: 'PUT'
-      });
-    }
-    else{
-      //this removes all the items from the queue that are different to what is currently playing. This runs if the item just added to the queue is different to what is currently playing
-      let queued = items.filter(a => a.uri == this.stationuri);
-      let ids_to_remove = queued.map(a => a.id);
-      this.log.debug(ids_to_remove);
-      for (const id of ids_to_remove) {
-        fetch(`http://${this.serverip}:${this.serverport}/api/queue/items/${id}`, {
-          method: 'DELETE'
-        });
+        this.fetchPUTdata(`http://${this.serverip}:${this.serverport}/api/outputs/${this.id}`, true);
+        this.fetchPUT(`http://${this.serverip}:${this.serverport}/api/player/play`);
       }
-
-      this.log("Alredy different station playing on another device, stop that before starting another station");
-    }
+      else{
+        //this removes all the items from the queue that are different to what is currently playing. This runs if the item just added to the queue is different to what is currently playing
+        let queued = items.filter(a => a.uri == this.stationuri);
+        let ids_to_remove = queued.map(a => a.id);
+        this.log.debug(ids_to_remove);
+        for (const id of ids_to_remove) {
+          this.fetchDELETE(`http://${this.serverip}:${this.serverport}/api/queue/items/${id}`);
+        }
+        this.log("Alredy different station playing on another device, stop that before starting another station");
+      }
     }
     else{
-      async function getActive(serverip, serverport){
-        return await fetch(`http://${serverip}:${serverport}/api/outputs`)
-        .then(res => res.json());
-       }
-      let outputs = await getActive(this.serverip, this.serverport);
+      let outputs = await this.fetchGET(`http://${this.serverip}:${this.serverport}/api/outputs`, this.checkResponseStatus, this.ServerError);//get active 
       let arr_active = outputs.outputs.filter(a => a.selected == true);//get array of active outputs
       if (arr_active.length > 1){// if this isn't the last output active, only toggle the output
-        fetch(`http://${this.serverip}:${this.serverport}/api/outputs/${this.id}`,{
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json; charset=UTF-8'
-        },
-        body: JSON.stringify({"selected":false})
-      });
+        this.fetchPUTdata(`http://${this.serverip}:${this.serverport}/api/outputs/${this.id}`, false);
       }
       else{// if its the last output active, stop playback, clear queue, toggle output.
-        fetch(`http://${this.serverip}:${this.serverport}/api/player/stop`, {
-          method: 'PUT'
-        });
-        fetch(`http://${this.serverip}:${this.serverport}/api/queue/clear`, {
-          method: 'PUT'
-        });
-        fetch(`http://${this.serverip}:${this.serverport}/api/outputs/${this.id}`,{
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json; charset=UTF-8'
-          },
-          body: JSON.stringify({"selected":false})
-        });
+        this.fetchPUT(`http://${this.serverip}:${this.serverport}/api/player/stop`);
+        this.fetchPUT(`http://${this.serverip}:${this.serverport}/api/player/stop`);
+        this.fetchPUTdata(`http://${this.serverip}:${this.serverport}/api/outputs/${this.id}`, false);
       }
       this.log.debug("Switched off");
     }

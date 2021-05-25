@@ -1,6 +1,6 @@
 {
   "name": "homebridge-owntone-radio",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "A homebridge plugin to play radio web streams using owntone",
   "repository": {
     "type": "git",
