@@ -55,25 +55,24 @@ class OwnToneRadio {
     this.log.debug('owntone-radio plugin loaded');
   }
 
-  async fetchGET(url,checkResponseStatus,ServerError){
+  async fetchGET(url,checkResponseStatus,ServerError,log){
   return await fetch(url)
   .catch(err => {
     return {
       ok: false,
-      status: -1,
-      statusText: 'Network Failure',
+      error: 'Error processing fetch request, make sure the network is avaliable, you are using the correct server IP Address and the OwnTone server is running',
       };
     })
     .then(checkResponseStatus)
     .then(res => res.json())
-    .catch((err) => ServerError(err));
+    .catch((err) => ServerError(err,log));
   }
   fetchPOST(url){//needs exception handling
     fetch(url, {
       method: 'POST'
     });
   }
-  fetchPUTdata(url, selected){//this needs some attention bc it doesnt work.
+  fetchPUTdata(url, selected){
     fetch(url,{
       method: 'PUT',
       headers: {
@@ -105,18 +104,18 @@ class OwnToneRadio {
   }
 
 
-  checkResponseStatus(res) {// add some elseif's for different errors with different messagaes(an array with two strings, one for warning log, one for debug log), ill then change servererror() to log both of these.
+  checkResponseStatus(res) {
     if(res.ok){
         return res
     } 
     else {
-        throw new Error(`The HTTP status of the reponse: ${res.status} (${res.statusText})`);
-        console.log('thrown error');
+        let error = res.error;
+        throw new Error (error);
     }
   }
-  ServerError(err){
-    console.log('Cannot connect to OwnTone Server. Please check you have the correct IP Address and the server is running.');
-    console.log(err);
+  ServerError(err,log){
+    log.warn('Cannot connect to OwnTone Server.');//this.log.warn
+    log.debug(err);//this.log.debug
   }
   /**
    * REQUIRED - This must return an array of the services you want to expose.
@@ -133,12 +132,12 @@ class OwnToneRadio {
     this.log.debug('Getting switch state');
     let value = false;
     //gets the global playing state
-    let player = await this.fetchGET(`http://${this.serverip}:${this.serverport}/api/player`, this.checkResponseStatus, this.ServerError);//get status
+    let player = await this.fetchGET(`http://${this.serverip}:${this.serverport}/api/player`, this.checkResponseStatus, this.ServerError,this.log);//get status
     //gets the device active state
-    let outputs = await this.fetchGET(`http://${this.serverip}:${this.serverport}/api/outputs`,this.checkResponseStatus, this.ServerError);//getActive
-    var result = outputs.outputs.filter(a => a.id == this.id);
+    let outputs = await this.fetchGET(`http://${this.serverip}:${this.serverport}/api/outputs`,this.checkResponseStatus, this.ServerError,this.log);//getActive
+    var result = outputs.outputs.filter(a => a.id == this.id);// need exception handling here
     //this gets the queue and then check if the station in the config matches whats in the queue.
-    let queue = await this.fetchGET(`http://${this.serverip}:${this.serverport}/api/queue`,this.checkResponseStatus, this.ServerError); //getQueue
+    let queue = await this.fetchGET(`http://${this.serverip}:${this.serverport}/api/queue`,this.checkResponseStatus, this.ServerError,this.log); //getQueue
     let items = queue.items;
     let inqueue = items.some(a => a.uri == this.stationuri);
     //need exception handling here, incase result[] is empty.
@@ -153,7 +152,7 @@ class OwnToneRadio {
     this.log.debug('Setting switch state to:', value);
     if (value == true){
       this.fetchPOST(`http://${this.serverip}:${this.serverport}/api/queue/items/add?uris=${this.stationuri}`);
-      let queue = await this.fetchGET(`http://${this.serverip}:${this.serverport}/api/queue`,this.checkResponseStatus, this.ServerError); //getQueue
+      let queue = await this.fetchGET(`http://${this.serverip}:${this.serverport}/api/queue`,this.checkResponseStatus, this.ServerError,this.log); //getQueue
       var items = queue.items
       function urisAreIdentical(arr) {//function to check if there are duplicate items in queue.
         let theuri, urisAreTheSame = true;
@@ -180,7 +179,7 @@ class OwnToneRadio {
       }
     }
     else{
-      let outputs = await this.fetchGET(`http://${this.serverip}:${this.serverport}/api/outputs`, this.checkResponseStatus, this.ServerError);//get active 
+      let outputs = await this.fetchGET(`http://${this.serverip}:${this.serverport}/api/outputs`, this.checkResponseStatus, this.ServerError,this.log);//get active 
       let arr_active = outputs.outputs.filter(a => a.selected == true);//get array of active outputs
       if (arr_active.length > 1){// if this isn't the last output active, only toggle the output
         this.fetchPUTdata(`http://${this.serverip}:${this.serverport}/api/outputs/${this.id}`, false);
