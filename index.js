@@ -135,14 +135,19 @@ class OwnToneRadio {
     let player = await this.fetchGET(`http://${this.serverip}:${this.serverport}/api/player`, this.checkResponseStatus, this.ServerError,this.log);//get status
     //gets the device active state
     let outputs = await this.fetchGET(`http://${this.serverip}:${this.serverport}/api/outputs`,this.checkResponseStatus, this.ServerError,this.log);//getActive
-    var result = outputs.outputs.filter(a => a.id == this.id);// need exception handling here
-    //this gets the queue and then check if the station in the config matches whats in the queue.
-    let queue = await this.fetchGET(`http://${this.serverip}:${this.serverport}/api/queue`,this.checkResponseStatus, this.ServerError,this.log); //getQueue
-    let items = queue.items;
-    let inqueue = items.some(a => a.uri == this.stationuri);
-    //need exception handling here, incase result[] is empty.
-    if(player.state == 'play' && result[0].selected && inqueue){
-      value = true;
+    if(outputs == null){
+      value = false;
+      this.log.debug('Server is down or no airplay devices found on your network');
+    }
+    else{
+      var result = outputs.outputs.filter(a => a.id == this.id);
+      //this gets the queue and then check if the station in the config matches whats in the queue.
+      let queue = await this.fetchGET(`http://${this.serverip}:${this.serverport}/api/queue`,this.checkResponseStatus, this.ServerError,this.log); //getQueue
+      let items = queue.items;
+      let inqueue = items.some(a => a.uri == this.stationuri);
+      if (player.state == 'play' && result[0].selected && inqueue){
+        value = true;
+      }
     }
     this.log.debug(value);
     return value;
