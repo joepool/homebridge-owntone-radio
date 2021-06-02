@@ -191,7 +191,7 @@ class OwnToneRadio {
       }
       else{// if its the last output active, stop playback, clear queue, toggle output.
         this.fetchPUT(`http://${this.serverip}:${this.serverport}/api/player/stop`);
-        this.fetchPUT(`http://${this.serverip}:${this.serverport}/api/player/stop`);
+        this.fetchPUT(`http://${this.serverip}:${this.serverport}/api/queue/clear`);
         this.fetchPUTdata(`http://${this.serverip}:${this.serverport}/api/outputs/${this.id}`, false);
       }
       this.log.debug("Switched off");
