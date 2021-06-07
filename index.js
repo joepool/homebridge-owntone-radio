@@ -17,6 +17,7 @@ class OwnToneRadio {
     this.serverip = config['serverip'] || 'localhost';
     this.serverport = config['serverport'] || '3689';
     this.stationuri = config['stationuri'];
+    this.dev_discover = config['device_discovery'] || false;
 
     var Status = this.fetchStatus(`http://${this.serverip}:${this.serverport}/api/config`);
     Status.then(a => {
@@ -40,6 +41,10 @@ class OwnToneRadio {
     if (this.serverip == 'localhost'){
       this.log('Server IP address not entered, using localhost');
     }
+    if (this.dev_discover){
+      this.discovery(`http://${this.serverip}:${this.serverport}/api/outputs`,this.checkResponseStatus, this.ServerError,this.log);
+      return;
+    }
     // your accessory must have an AccessoryInformation service
     this.informationService = new this.api.hap.Service.AccessoryInformation()
       .setCharacteristic(this.api.hap.Characteristic.Manufacturer, "Custom Manufacturer")
@@ -55,6 +60,16 @@ class OwnToneRadio {
     this.log.debug('owntone-radio plugin loaded');
   }
 
+  async discovery(a,b,c,d) {
+    let outputs_arr = await this.fetchGET(a,b,c,d);
+    let outputs = outputs_arr.outputs;
+    outputs.forEach(device => {
+      this.log('\nDevice Name:',device.name,'\nDevice ID:',device.id);
+      if(device.requires_auth || device.needs_auth_key){
+        this.log.warn(device.name,`requires authentication, use OwnTone web interface to authenticate before using: http://192.168.0.24:3689/#/settings/remotes-outputs`);//TODO make this link correspond to server address 
+      }
+    });
+  }
   async fetchGET(url,checkResponseStatus,ServerError,log){
   return await fetch(url)
   .catch(err => {
