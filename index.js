@@ -42,7 +42,7 @@ class OwnToneRadio {
       this.log('Server IP address not entered, using localhost');
     }
     if (this.dev_discover){
-      this.discovery(`http://${this.serverip}:${this.serverport}/api/outputs`,this.checkResponseStatus, this.ServerError,this.log);
+      this.discovery(this.serverip,this.serverport,this.checkResponseStatus,this.ServerError,this.log);
       return;
     }
     // your accessory must have an AccessoryInformation service
@@ -60,13 +60,19 @@ class OwnToneRadio {
     this.log.debug('owntone-radio plugin loaded');
   }
 
-  async discovery(a,b,c,d) {
-    let outputs_arr = await this.fetchGET(a,b,c,d);
+  async discovery(ip,port,crs,se,log) {
+    let url = `http://${ip}:${port}/api/outputs`;
+    let outputs_arr = await this.fetchGET(url,crs,se,log);
     let outputs = outputs_arr.outputs;
     outputs.forEach(device => {
       this.log('\nDevice Name:',device.name,'\nDevice ID:',device.id);
       if(device.requires_auth || device.needs_auth_key){
-        this.log.warn(device.name,`requires authentication, use OwnTone web interface to authenticate before using: http://192.168.0.24:3689/#/settings/remotes-outputs`);//TODO make this link correspond to server address 
+        if(ip != 'localhost'){
+          this.log.warn(device.name,`requires authentication, use OwnTone web interface to authenticate before using with this plugin: http://${ip}:${port}/#/settings/remotes-outputs`);
+        }
+        else{
+          this.log.warn(device.name,'requires authentication, use OwnTone web interface to authenticate before using with this plugin');
+        }
       }
     });
   }
