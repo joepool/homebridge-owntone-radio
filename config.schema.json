@@ -1,0 +1,61 @@
+{
+  "pluginAlias": "owntone-radio",
+  "pluginType": "accessory",
+  "singular": false,
+  "headerDisplay": "Header",
+  "footerDisplay": "Footer",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "title": "Name",
+        "type": "string",
+        "description": "The name of the switch in HomeKit.",
+        "required": true
+      },
+      "serverip":{
+        "title": "Server IP Address",
+        "type": "string",
+        "description": "The IPv4 address of your OwnTone Server. Leave blank for localhost",
+        "format": "ipv4",
+        "required": false
+      },
+      "serverport":{
+        "title": "Server Port",
+        "type": "string",
+        "description": "The port of your OwnTone Server. Leave black if unchanged from default",
+        "placeholder": "3689",
+        "minLength": 4,
+        "maxLength": 4,
+        "required": false
+      },
+      "device_discovery":{
+        "title": "Device Discovery",
+        "type": "boolean",
+        "description": "Device discovery option. See readme for details TODO add link",
+        "default": false
+      },
+      "id":{
+        "title": "Device ID",
+        "type": "string",
+        "description": "ID of device can be found using device discovery TODO add link to readme",
+        "required": true,
+        "condition": {
+          "functionBody": "return model.device_discovery === false;"
+        }
+      },
+      "stationuri":{
+        "title": "Station URI",
+        "type": "string",
+        "description": "URI of station to be played TODO add link to readme",
+        "format": "uri",
+        "required": true,
+        "condition": {
+          "functionBody": "return model.device_discovery === false;"
+        }
+      }
+    }
+  },
+  "form": null,
+  "display": null
+}

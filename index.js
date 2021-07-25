@@ -21,7 +21,7 @@ class OwnToneRadio {
       }
     });
     var missing = ' is missing from your config, this accessory will not be loaded.';
-    if (this.id == null){
+    if (this.id == null && this.dev_discover == false){
     	this.log.warn('Device ID', missing);
     	return;
     }
@@ -29,7 +29,7 @@ class OwnToneRadio {
       this.log.warn('Device Name', missing);
       return;
     }
-    if (this.stationuri == null){
+    if (this.stationuri == null && this.dev_discover == false){
       this.log.warn('Station URI', missing);
       return;
     }
