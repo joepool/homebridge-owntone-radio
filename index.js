@@ -223,17 +223,22 @@ class OwnToneRadio {
     }
     }
     else{
-      let outputs = await this.fetchGET(`http://${this.serverip}:${this.serverport}/api/outputs`, this.checkResponseStatus, this.ServerError,this.log);//get active 
-      let arr_active = outputs.outputs.filter(a => a.selected == true);//get array of active outputs
-      if (arr_active.length > 1){// if this isn't the last output active, only toggle the output
-        this.fetchPUTdata(`http://${this.serverip}:${this.serverport}/api/outputs/${this.id}`, false);
+      let outputs = await this.fetchGET(`http://${this.serverip}:${this.serverport}/api/outputs`, this.checkResponseStatus, this.ServerError,this.log);//get active
+      if (outputs == null){
+        this.log.debug('Server is down or no airplay devices found on your network');
       }
-      else{// if its the last output active, stop playback, clear queue, toggle output.
-        this.fetchPUT(`http://${this.serverip}:${this.serverport}/api/player/stop`);
-        this.fetchPUT(`http://${this.serverip}:${this.serverport}/api/queue/clear`);
-        this.fetchPUTdata(`http://${this.serverip}:${this.serverport}/api/outputs/${this.id}`, false);
+      else{
+        let arr_active = outputs.outputs.filter(a => a.selected == true);//get array of active outputs
+        if (arr_active.length > 1){// if this isn't the last output active, only toggle the output
+          this.fetchPUTdata(`http://${this.serverip}:${this.serverport}/api/outputs/${this.id}`, false);
+        }
+        else{// if its the last output active, stop playback, clear queue, toggle output.
+          this.fetchPUT(`http://${this.serverip}:${this.serverport}/api/player/stop`);
+          this.fetchPUT(`http://${this.serverip}:${this.serverport}/api/queue/clear`);
+          this.fetchPUTdata(`http://${this.serverip}:${this.serverport}/api/outputs/${this.id}`, false);
+        }
+        this.log.debug("Switched off");
       }
-      this.log.debug("Switched off");
     }
   }
 }
