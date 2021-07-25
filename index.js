@@ -2,12 +2,7 @@ const fetch = require('node-fetch');
 module.exports = (api) => {
   api.registerAccessory('owntone-radio', OwnToneRadio);
 }
-
 class OwnToneRadio {
-
-  /**
-   * REQUIRED - This is the entry point to your plugin
-   */
   constructor(log, config, api) {
     this.log = log;
     this.config = config;
@@ -45,21 +40,15 @@ class OwnToneRadio {
       this.discovery(this.serverip,this.serverport,this.checkResponseStatus,this.ServerError,this.log);
       return;
     }
-    // your accessory must have an AccessoryInformation service
     this.informationService = new this.api.hap.Service.AccessoryInformation()
       .setCharacteristic(this.api.hap.Characteristic.Manufacturer, "Custom Manufacturer")
       .setCharacteristic(this.api.hap.Characteristic.Model, "Custom Model");
-
-    // create a new "Switch" service
     this.switchService = new this.api.hap.Service.Switch(this.name);
-
-    // link methods used when getting or setting the state of the service 
     this.switchService.getCharacteristic(this.api.hap.Characteristic.On)
       .onGet(this.getOnHandler.bind(this))   // bind to getOnHandler method below
       .onSet(this.setOnHandler.bind(this));  // bind to setOnHandler method below
     this.log.debug('owntone-radio plugin loaded');
   }
-
   async discovery(ip,port,crs,se,log) {
     let url = `http://${ip}:${port}/api/outputs`;
     let outputs_arr = await this.fetchGET(url,crs,se,log);
@@ -125,7 +114,7 @@ class OwnToneRadio {
       method: 'DELETE'
     });
   }
-  fetchStatus(url){//probably change this to a better method, with better exception handling etc
+  fetchStatus(url){
     return fetch(url)
     .then(response => response.json())
     .then(function(response) {
@@ -136,8 +125,6 @@ class OwnToneRadio {
       return (error);
     });    
   }
-
-
   checkResponseStatus(res) {
     if(res.ok){
         return res
@@ -151,10 +138,6 @@ class OwnToneRadio {
     log.warn('Cannot connect to OwnTone Server.');//this.log.warn
     log.debug(err);//this.log.debug
   }
-  /**
-   * REQUIRED - This must return an array of the services you want to expose.
-   * This method must be named "getServices".
-   */
   getServices() {
     return [
       this.informationService,
@@ -162,7 +145,6 @@ class OwnToneRadio {
     ];
   }
   async getOnHandler() {
-    // get the current value of the switch in your own code
     this.log.debug('Getting switch state');
     let value = false;
     //gets the global playing state
