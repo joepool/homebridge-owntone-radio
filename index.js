@@ -63,18 +63,23 @@ class OwnToneRadio {
   async discovery(ip,port,crs,se,log) {
     let url = `http://${ip}:${port}/api/outputs`;
     let outputs_arr = await this.fetchGET(url,crs,se,log);
-    let outputs = outputs_arr.outputs;
-    outputs.forEach(device => {
-      this.log('\nDevice Name:',device.name,'\nDevice ID:',device.id);
-      if(device.requires_auth || device.needs_auth_key){
-        if(ip != 'localhost'){
-          this.log.warn(device.name,`requires authentication, use OwnTone web interface to authenticate before using with this plugin: http://${ip}:${port}/#/settings/remotes-outputs`);
+    if(outputs_arr == null){
+      this.log.warn('Server is down or no airplay devices found on your network');
+    }
+    else{
+      let outputs = outputs_arr.outputs;
+      outputs.forEach(device => {
+        this.log('\nDevice Name:',device.name,'\nDevice ID:',device.id);
+        if(device.requires_auth || device.needs_auth_key){
+          if(ip != 'localhost'){
+            this.log.warn(device.name,`requires authentication, use OwnTone web interface to authenticate before using with this plugin: http://${ip}:${port}/#/settings/remotes-outputs`);
+          }
+          else{
+            this.log.warn(device.name,'requires authentication, use OwnTone web interface to authenticate before using with this plugin');
+          }
         }
-        else{
-          this.log.warn(device.name,'requires authentication, use OwnTone web interface to authenticate before using with this plugin');
-        }
-      }
-    });
+      });
+    }
   }
   async fetchGET(url,checkResponseStatus,ServerError,log){
   return await fetch(url)
@@ -88,10 +93,18 @@ class OwnToneRadio {
     .then(res => res.json())
     .catch((err) => ServerError(err,log));
   }
-  fetchPOST(url){//needs exception handling
+  fetchPOST(url,checkResponseStatus,ServerError,log){
     fetch(url, {
       method: 'POST'
-    });
+    })
+    .catch(err => {
+    return {
+      ok: false,
+      error: 'Error processing fetch POST request, make sure the network is avaliable, you are using the correct server IP Address and the OwnTone server is running',
+      };
+    })
+    .then(checkResponseStatus)
+    .catch((err) => ServerError(err,log));
   }
   fetchPUTdata(url, selected){
     fetch(url,{
@@ -177,8 +190,12 @@ class OwnToneRadio {
     // add new item to queue, then check if there are two items in queue with different uri's, if there are, dont activate device or play, if not, continue 
     this.log.debug('Setting switch state to:', value);
     if (value == true){
-      this.fetchPOST(`http://${this.serverip}:${this.serverport}/api/queue/items/add?uris=${this.stationuri}`);
+      this.fetchPOST(`http://${this.serverip}:${this.serverport}/api/queue/items/add?uris=${this.stationuri}`, this.checkResponseStatus, this.ServerError,this.log);
       let queue = await this.fetchGET(`http://${this.serverip}:${this.serverport}/api/queue`,this.checkResponseStatus, this.ServerError,this.log); //getQueue
+      if (queue == null){
+        this.log.debug('Server is down or no airplay devices found on your network');
+      }
+      else{
       var items = queue.items
       function urisAreIdentical(arr) {//function to check if there are duplicate items in queue.
         let theuri, urisAreTheSame = true;
@@ -203,6 +220,7 @@ class OwnToneRadio {
         }
         this.log("Alredy different station playing on another device, stop that before starting another station");
       }
+    }
     }
     else{
       let outputs = await this.fetchGET(`http://${this.serverip}:${this.serverport}/api/outputs`, this.checkResponseStatus, this.ServerError,this.log);//get active 
