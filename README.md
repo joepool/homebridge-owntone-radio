@@ -49,8 +49,34 @@ Using Homebridge UI, simply add a name, the Device ID and Station URI you found 
 Save your changes and restart Homebridge. Open the Home app and you should have a new accessory that will play your chosen radio station on your AirPlay device with switched on.
 
 JSON for manual configuration shown below
+```
+"accessories": [
+    {
+        "accessory": "owntone-radio",
+        "name": "Radio 1 Kitchen",
+        "id": "xxxxxxxxxxxxxxx",
+        "stationuri": "library:playlist:x"
+    },
+    {
+        "accessory": "owntone-radio",
+        "name": "Radio 1 Living Room",
+        "id": "xxxxxxxxxxxxxxx",
+        "stationuri": "library:playlist:x"
+    }
+]
+```
+
+In this example, the id's should be different as they are different devices, but the stationuri's should be the same as they are the same radio station (bassed on the accessory name).
 
 ### Advanced Configuration
-
+|Option|Required|Default|Explaination|
+|------------------|:--------:|-------|------------|
+|name|&#9745;||The name of the switch that shows up in homekit.<br>This can be anything|
+|id|&#9745;||The OwnTone AirPlay Device ID to play on. <br>This is found using the `device_discovery` option.<br>Unique to each device|
+|stationuri|&#9745;||The URI of the radio station to be played.<br>This is found using the `station_discovery` option.<br>Unique to each station|
+|serverip||localhost|The IP address the Owntone Server is running on|
+|serverport||3689|The port the OwnTone Server is running on |
+|device\_discovery||false|Option to enable AirPlay device discovery.<br>The accessory will not be added to Homekit if this option is enabled.<br>Will output a list of AirPlay devices and their ID's to Homebridge logs |
+|station\_discovery||false|Option to enable Station URI discovery.<br>The accessory will not be added to Homekit if this option is enabled.<br>Will output a list of Stations devices and their URI's to Homebridge logs |
 ### Troubbleshooting
 disable ipv6 in owntone

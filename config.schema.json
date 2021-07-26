@@ -45,6 +45,8 @@
         "title": "Device ID",
         "type": "string",
         "description": "ID of device can be found using device discovery TODO add link to readme",
+        "minLength": 15,
+        "maxLength": 15,
         "required": true,
         "condition": {
           "functionBody": "return model.device_discovery === false && model.station_discovery === false;"
