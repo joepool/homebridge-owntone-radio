@@ -71,6 +71,7 @@ In this example, the id's should be different as they are different devices, but
 ### Advanced Configuration
 |Option|Required|Default|Explaination|
 |------------------|:--------:|-------|------------|
+|accessory|&#9745;||This **must** be owntone-radio
 |name|&#9745;||The name of the switch that shows up in homekit.<br>This can be anything|
 |id|&#9745;||The OwnTone AirPlay Device ID to play on. <br>This is found using the `device_discovery` option.<br>Unique to each device|
 |stationuri|&#9745;||The URI of the radio station to be played.<br>This is found using the `station_discovery` option.<br>Unique to each station|
