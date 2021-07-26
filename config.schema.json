@@ -35,13 +35,19 @@
         "description": "Device discovery option. See readme for details TODO add link",
         "default": false
       },
+      "station_discovery":{
+        "title": "Station Discovery",
+        "type": "boolean",
+        "description": "Station discovery option. See readme for details TODO add link",
+        "default": false
+      },
       "id":{
         "title": "Device ID",
         "type": "string",
         "description": "ID of device can be found using device discovery TODO add link to readme",
         "required": true,
         "condition": {
-          "functionBody": "return model.device_discovery === false;"
+          "functionBody": "return model.device_discovery === false && model.station_discovery === false;"
         }
       },
       "stationuri":{
@@ -51,7 +57,7 @@
         "format": "uri",
         "required": true,
         "condition": {
-          "functionBody": "return model.device_discovery === false;"
+          "functionBody": "return model.device_discovery === false && model.station_discovery === false;"
         }
       }
     }
