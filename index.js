@@ -37,6 +37,11 @@ class OwnToneRadio {
     if (this.serverip == 'localhost'){
       this.log('Server IP address not entered, using localhost');
     }
+    if (this.dev_discover && this.station_discover){
+      this.discovery(this.serverip,this.serverport,this.checkResponseStatus,this.ServerError,this.log);
+      this.station_discovery(this.serverip,this.serverport,this.checkResponseStatus,this.ServerError,this.log);
+      return
+    }
     if (this.dev_discover){
       this.discovery(this.serverip,this.serverport,this.checkResponseStatus,this.ServerError,this.log);
       return;
