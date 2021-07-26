@@ -13,6 +13,7 @@ class OwnToneRadio {
     this.serverport = config['serverport'] || '3689';
     this.stationuri = config['stationuri'];
     this.dev_discover = config['device_discovery'] || false;
+    this.station_discover = config['station_discovery'] || false;
 
     var Status = this.fetchStatus(`http://${this.serverip}:${this.serverport}/api/config`);
     Status.then(a => {
@@ -21,7 +22,7 @@ class OwnToneRadio {
       }
     });
     var missing = ' is missing from your config, this accessory will not be loaded.';
-    if (this.id == null && this.dev_discover == false){
+    if (this.id == null && this.dev_discover == false && this.station_discover == false){
     	this.log.warn('Device ID', missing);
     	return;
     }
@@ -29,7 +30,7 @@ class OwnToneRadio {
       this.log.warn('Device Name', missing);
       return;
     }
-    if (this.stationuri == null && this.dev_discover == false){
+    if (this.stationuri == null && this.dev_discover == false && this.station_discover == false){
       this.log.warn('Station URI', missing);
       return;
     }
@@ -38,6 +39,10 @@ class OwnToneRadio {
     }
     if (this.dev_discover){
       this.discovery(this.serverip,this.serverport,this.checkResponseStatus,this.ServerError,this.log);
+      return;
+    }
+    if(this.station_discover){
+      this.station_discovery(this.serverip,this.serverport,this.checkResponseStatus,this.ServerError,this.log);
       return;
     }
     this.informationService = new this.api.hap.Service.AccessoryInformation()
@@ -67,6 +72,19 @@ class OwnToneRadio {
             this.log.warn(device.name,'requires authentication, use OwnTone web interface to authenticate before using with this plugin');
           }
         }
+      });
+    }
+  }
+  async station_discovery(ip,port,crs,se,log){
+    let url = `http://${ip}:${port}/api/library/playlists`
+    let playlists = await this.fetchGET(url,crs,se,log);
+    if(playlists.total == 0){
+      this.log.warn('Your Library is empty!');
+    }
+    else{
+      let playlists_arr = playlists.items;
+      playlists_arr.forEach(station => {
+        this.log('\nStation Name:',station.name,'\nStation URI:',station.uri);
       });
     }
   }
