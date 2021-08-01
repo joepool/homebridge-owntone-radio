@@ -6,8 +6,14 @@ This [Homebridge](https://github.com/homebridge/homebridge) Plugin allows playin
 Assuming Global Installation of Homekit: `npm i homebridge-owntone-radio`  
 Or use Homebridge UI
 ## OwnTone Configuration
-
-## HomeBridge Configuration
+First you will need to set up an Owntone server. This can be done on the same device as Homebridge, or somehting else on your network.  
+Follow the instructions found in the [Owntone docs](https://github.com/owntone/owntone-server/blob/master/INSTALL.md) for setup instructions.  
+You may need to edit the Owntone configuration file to suit your needs. This can be done by running the command `sudo nano /etc/owntone.conf` however this may be diffrent depending on your operating system.  
+You will need to add radio station files to your Owntone library. You can either use the [examples I have created](https://github.com/joepool/homebridge-owntone-radio/tree/main/Stations), or create your own `.m3u` files.  
+These files will need to be placed into your library. The default library location is `/srv/music/` but this can be changed if you like. You may need to create this directory if it doesnt already exist, for example `sudo mkdir srv/music`. You can then copy your `.m3u` station files into this directory.  
+Restart owntone (this will usually be `sudo service owntone restart`).  
+You can then continue with the Homebridge configuration.  
+## Homebridge Configuration
 The easiest method is using [Homebridge UI](https://github.com/oznu/homebridge-config-ui-x). This is much easier than editing JSON.
 ### Initial Configuration
 Initially you will need to find the OwnTone Device ID's of your AirPlay Devices as well as the OwnTone Radio Station URI's.   
@@ -80,4 +86,7 @@ In this example, the id's should be different as they are different devices, but
 |device\_discovery||false|Option to enable AirPlay device discovery.<br>The accessory will not be added to Homekit if this option is enabled.<br>Will output a list of AirPlay devices and their ID's to Homebridge logs |
 |station\_discovery||false|Option to enable Station URI discovery.<br>The accessory will not be added to Homekit if this option is enabled.<br>Will output a list of Stations devices and their URI's to Homebridge logs |
 ### Troubbleshooting
-disable ipv6 in owntone
+If no sound is played from a HomePod, you may need to disable IPv6 in the Owntone configuration:  
+Edit your config file (for example: `sudo nano /etc/owntone.conf`).  
+On line 44 of the default config file, uncomment the Ipv6 line (remove the `#` and make sure it is set as `ipv6 = no`).  
+Restart Owntone.
