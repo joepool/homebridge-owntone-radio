@@ -88,5 +88,5 @@ In this example, the id's should be different as they are different devices, but
 ### Troubbleshooting
 If no sound is played from a HomePod, you may need to disable IPv6 in the Owntone configuration:  
 Edit your config file (for example: `sudo nano /etc/owntone.conf`).  
-On line 44 of the default config file, uncomment the Ipv6 line (remove the `#` and make sure it is set as `ipv6 = no`).  
+On line 44 (if the config file is unchanged), uncomment the ipv6 line (remove the `#`) and make sure it is set as `ipv6 = no`.  
 Restart Owntone.
