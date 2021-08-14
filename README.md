@@ -44,7 +44,7 @@ or
     }
 ]
 ```
-Then, restart Homebridge and check your logs. Once Homebridge has started, you shoud see a list of all your AirPlay deveices with their Device ID's followed by a list of Radio Stations you previosuly added to your library and their URI's. Find the device and station your would like to use and get the device ID and Station URI.
+Then, restart Homebridge and check your logs. Once Homebridge has started, you shoud see a list of all your AirPlay deveices with their Device ID's followed by a list of Radio Stations you previosuly added to your library and their URI's. Find the device and station your would like to use and get the device ID and Station URI. This accessory/accessories can be removed once you have obtained your device ID's and URI's.
 ### Basic Configuration
 Once you have found your Device ID and Station URI, you can create an accessory that will be added to HomeKit.  
 Using Homebridge UI, simply add a name, the Device ID and Station URI you found previosuly, OwnTone Server IP address (if it's not localhost) and OwnTone Server Port (if it's different from default). 
