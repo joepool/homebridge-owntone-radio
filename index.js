@@ -88,9 +88,17 @@ class OwnToneRadio {
     }
     else{
       let playlists_arr = playlists.items;
-      playlists_arr.forEach(station => {
-        this.log('\nStation Name:',station.name,'\nStation URI:',station.uri);
-      });
+      for (var i = 0; i < playlists_arr.length; i++) {
+        let playlist = playlists_arr[i].id;
+        let tracks = await this.fetchGET(`http://${ip}:${port}/api/library/playlists/${playlist}/tracks`,crs,se,log);
+        if (tracks.total > 1){
+          this.log.warn("Maximum stations per playlistr exceeded, only one station per m3u playlist file");
+        }
+        else{
+          let uri = tracks.items[0].uri;
+          this.log('\nStation Name:',playlists_arr[i].name,'\nStation URI:',uri);
+        }
+      }
     }
   }
   async fetchGET(url,checkResponseStatus,ServerError,log){
