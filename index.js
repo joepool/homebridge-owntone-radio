@@ -92,7 +92,7 @@ class OwnToneRadio {
         let playlist = playlists_arr[i].id;
         let tracks = await this.fetchGET(`http://${ip}:${port}/api/library/playlists/${playlist}/tracks`,crs,se,log);
         if (tracks.total > 1){
-          this.log.warn("Maximum stations per playlistr exceeded, only one station per m3u playlist file");
+          this.log.warn("Maximum stations per playlist exceeded, only one station per m3u playlist file");
         }
         else{
           let uri = tracks.items[0].uri;
