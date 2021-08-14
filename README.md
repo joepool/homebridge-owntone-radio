@@ -61,13 +61,13 @@ JSON for manual configuration shown below
         "accessory": "owntone-radio",
         "name": "Radio 1 Kitchen",
         "id": "xxxxxxxxxxxxxxx",
-        "stationuri": "library:playlist:x"
+        "stationuri": "library:track:x"
     },
     {
         "accessory": "owntone-radio",
         "name": "Radio 1 Living Room",
         "id": "xxxxxxxxxxxxxxx",
-        "stationuri": "library:playlist:x"
+        "stationuri": "library:track:x"
     }
 ]
 ```

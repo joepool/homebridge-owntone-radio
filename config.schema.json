@@ -56,6 +56,7 @@
         "title": "Station URI",
         "type": "string",
         "description": "URI of station to be played TODO add link to readme",
+        "placeholder": "library:track:x",
         "format": "uri",
         "required": true,
         "condition": {
