@@ -2,15 +2,14 @@
   "pluginAlias": "owntone-radio",
   "pluginType": "accessory",
   "singular": false,
-  "headerDisplay": "Header",
-  "footerDisplay": "Footer",
+  "headerDisplay": "For more infomation on plugin configuration, please see the <a href='https://github.com/joepool/homebridge-owntone-radio/blob/main/README.md'>readme</a>",
   "schema": {
     "type": "object",
     "properties": {
       "name": {
         "title": "Name",
         "type": "string",
-        "description": "The name of the switch in HomeKit.",
+        "description": "The name of the switch in HomeKit, this can be anything.",
         "required": true
       },
       "serverip":{
@@ -32,19 +31,19 @@
       "device_discovery":{
         "title": "Device Discovery",
         "type": "boolean",
-        "description": "Device discovery option. See readme for details TODO add link",
+        "description": "Device discovery option. <a href='https://github.com/joepool/homebridge-owntone-radio/blob/main/README.md#Initial-Configuration'>See readme for details.</a>",
         "default": false
       },
       "station_discovery":{
         "title": "Station Discovery",
         "type": "boolean",
-        "description": "Station discovery option. See readme for details TODO add link",
+        "description": "Station discovery option. <a href='https://github.com/joepool/homebridge-owntone-radio/blob/main/README.md#Initial-Configuration'>See readme for details.</a>",
         "default": false
       },
       "id":{
         "title": "Device ID",
         "type": "string",
-        "description": "ID of device can be found using device discovery TODO add link to readme",
+        "description": "ID of device can be found using device discovery. <a href='https://github.com/joepool/homebridge-owntone-radio/blob/main/README.md#Basic-Configuration'>See readme for details.</a>",
         "minLength": 14,
         "maxLength": 16,
         "required": true,
@@ -55,7 +54,7 @@
       "stationuri":{
         "title": "Station URI",
         "type": "string",
-        "description": "URI of station to be played TODO add link to readme",
+        "description": "URI of station to be played. <a href='https://github.com/joepool/homebridge-owntone-radio/blob/main/README.md#Basic-Configuration'>See readme for details.</a>",
         "placeholder": "library:track:x",
         "format": "uri",
         "required": true,

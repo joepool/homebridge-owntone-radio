@@ -6,7 +6,7 @@ This [Homebridge](https://github.com/homebridge/homebridge) Plugin allows playin
 Assuming Global Installation of Homekit: `npm i homebridge-owntone-radio`  
 Or use Homebridge UI
 ## OwnTone Configuration
-First you will need to set up an Owntone server. This can be done on the same device as Homebridge, or somehting else on your network.  
+First you will need to set up an Owntone server. This can be done on the same device as Homebridge, or something else on your network.  
 Follow the instructions found in the [Owntone docs](https://github.com/owntone/owntone-server/blob/master/INSTALL.md) for setup instructions.  
 You may need to edit the Owntone configuration file to suit your needs. This can be done by running the command `sudo nano /etc/owntone.conf` however this may be diffrent depending on your operating system.  
 You will need to add radio station files to your Owntone library. You can either use the [examples I have created](https://github.com/joepool/homebridge-owntone-radio/tree/main/Stations), or create your own `.m3u` files.  

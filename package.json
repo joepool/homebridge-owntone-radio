@@ -1,20 +1,25 @@
 {
   "name": "homebridge-owntone-radio",
-  "version": "0.0.8",
+  "version": "1.0.0",
   "description": "A homebridge plugin to play radio web streams using owntone",
   "repository": {
     "type": "git",
     "url": "git://github.com/joepool/homebridge-owntone-radio"
   },
   "keywords": [
-    "homebridge-plugin"
+    "homebridge-plugin",
+    "homebridge",
+    "radio",
+    "owntone",
+    "airplay",
+    "homepod"
   ],
   "author": "joepool",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/joepool/homebridge-owntone-radio/issues"
   },
-  "homepage": "https://github.com/joepool/homebridge-owntone-radio2#readme",
+  "homepage": "https://github.com/joepool/homebridge-owntone-radio#readme",
   "dependencies": {
     "node-fetch": "^2.0.0"
   },
